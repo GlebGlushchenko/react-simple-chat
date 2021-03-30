@@ -1,15 +1,35 @@
+import React from 'react'
 import './App.css'
-import io from 'socket.io-client'
+import Login from './component/Login'
+import socket from './socket'
+import reducer from './component/reducer'
+import Chat from './component/Chat'
 
 function App() {
-  const connectedSocket = () => {
-    io('http://localhost:9999')
+  const [state, dispatch] = React.useReducer(reducer, {
+    joined: false,
+    roomId: null,
+    userName: null,
+  })
+
+  const onLogin = (obj) => {
+    dispatch({
+      type: 'JOINED',
+      payload: obj,
+    })
+    socket.emit('ROOM:JOIN', obj)
   }
+
+  React.useEffect(() => {
+    socket.on('ROOM:JOINED', (users) => {
+      console.log('New user', users)
+    })
+  }, [])
+
+  window.socket = socket
+
   return (
-    <div>
-      <h1>HELLO</h1>
-      <button onClick={connectedSocket}>CONNECTED</button>
-    </div>
+    <div className={'app_wrapper'}>{!state.joined ? <Login onLogin={onLogin} /> : <Chat />}</div>
   )
 }
 
