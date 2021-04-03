@@ -40,6 +40,15 @@ io.on('connection', (socket) => {
     const users = [...rooms.get(roomId).get('users').values()]
     socket.broadcast.to(roomId).emit('ROOM:JOINED', users)
   })
+
+  socket.on('disconnect', () => {
+    rooms.forEach((value, roomId) => {
+      if (value.get('users').delete(socket.id)) {
+        const users = [...rooms.get(roomId).get('users').values()]
+        socket.broadcast.to(roomId).emit('ROOM:SET_USERS', users)
+      }
+    })
+  })
 })
 
 server.listen(9999, (err) => {
