@@ -1,12 +1,35 @@
 import React from 'react'
+import socket from '../socket'
 
-function Chat({ users, messages }) {
+function Chat({ users, messages, roomId, userName, onAddMessage }) {
   const [messageValue, setMessageValue] = React.useState('')
-  console.log(users)
+  const messagesRef = React.useRef(null)
+  const onSendMessage = () => {
+    socket.emit('ROOM:NEW_MESSAGE', {
+      userName,
+      roomId,
+      text: messageValue,
+    })
+
+    onAddMessage({
+      userName,
+      text: messageValue,
+    })
+    setMessageValue('')
+  }
+
+  const handlerKeyUp = (e) => {
+    if (e.keyCode === 13) {
+      onSendMessage()
+    }
+  }
+  React.useEffect(() => {
+    messagesRef.current.scrollTo(0, 9999)
+  }, [messages])
   return (
     <div className="chat">
       <div className="chat-users">
-        ROOM: <b></b>
+        ROOM: <b>{roomId}</b>
         <hr />
         <b>ONLINE:({users.length})</b>
         <ul>
@@ -16,33 +39,24 @@ function Chat({ users, messages }) {
         </ul>
       </div>
       <div className="chat-messages">
-        <div className="messages">
-          <div className="message">
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Praesentium deserunt dolor
-              autem asperiores accusamus quibusdam ipsam similique magni eaque!
-            </p>
-            <div>
-              <span>Test user</span>
+        <div ref={messagesRef} className="messages">
+          {messages.map((message, index) => (
+            <div key={index} className="message">
+              <p>{message.text}</p>
+              <div>
+                <span>{message.userName}</span>
+              </div>
             </div>
-          </div>
-          <div className="message">
-            <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Praesentium deserunt dolor
-              autem asperiores accusamus quibusdam ipsam similique magni eaque!
-            </p>
-            <div>
-              <span>Test user</span>
-            </div>
-          </div>
+          ))}
         </div>
         <form>
           <textarea
+            onKeyUp={handlerKeyUp}
             onChange={(e) => setMessageValue(e.target.value)}
             value={messageValue}
             className="form-control"
             rows="3"></textarea>
-          <button type="button" className="btn btn-primary">
+          <button onClick={onSendMessage} type="button" className="btn btn-primary">
             SEND
           </button>
         </form>

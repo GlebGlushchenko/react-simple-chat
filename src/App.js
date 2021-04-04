@@ -4,6 +4,7 @@ import Login from './component/Login'
 import socket from './socket'
 import reducer from './component/reducer'
 import Chat from './component/Chat'
+import axios from 'axios'
 
 function App() {
   const [state, dispatch] = React.useReducer(reducer, {
@@ -14,18 +15,28 @@ function App() {
     messages: [],
   })
 
-  const onLogin = (obj) => {
+  const onLogin = async (obj) => {
     dispatch({
       type: 'JOINED',
       payload: obj,
     })
     socket.emit('ROOM:JOIN', obj)
+    const { data } = await axios.get(`/rooms/${obj.roomId}`)
+    console.log()
+    setUsers(data.users)
   }
 
   const setUsers = (users) => {
     dispatch({
       type: 'SET_USERS',
       payload: users,
+    })
+  }
+
+  const addMessage = (message) => {
+    dispatch({
+      type: 'NEW_MESSAGE',
+      payload: message,
     })
   }
 
@@ -37,6 +48,9 @@ function App() {
     socket.on('ROOM:SET_USERS', (users) => {
       setUsers(users)
     })
+    socket.on('ROOM:NEW_MESSAGE', (message) => {
+      addMessage(message)
+    })
   }, [])
 
   window.socket = socket
@@ -46,7 +60,12 @@ function App() {
       {!state.joined ? (
         <Login onLogin={onLogin} />
       ) : (
-        <Chat messages={state.messages} users={state.users} />
+        <Chat
+          roomId={state.roomId}
+          messages={state.messages}
+          {...state}
+          onAddMessage={addMessage}
+        />
       )}
     </div>
   )

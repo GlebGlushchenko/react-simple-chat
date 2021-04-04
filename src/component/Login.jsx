@@ -16,6 +16,12 @@ const Login = ({ onLogin }) => {
     await axios.post('/rooms', obj)
     onLogin(obj)
   }
+
+  const handlerKeyUp = (e) => {
+    if (e.keyCode === 13) {
+      onEnter()
+    }
+  }
   return (
     <div className="login">
       <h1 className={'login__title'}>Login</h1>
@@ -36,6 +42,7 @@ const Login = ({ onLogin }) => {
         placeholder={'Your name'}
         type="text"
         value={userName}
+        onKeyUp={handlerKeyUp}
       />
       <button disabled={isLoading} onClick={onEnter} className={'login__btn'}>
         {isLoading ? 'ENTER....' : 'ENTER'}
