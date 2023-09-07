@@ -73,5 +73,5 @@ server.listen(9999, (err) => {
   if (err) {
     throw Error(err)
   }
-  console.log('Server started')
+  console.log('Сервер запушен')
 })

@@ -9,3 +9,5 @@
     <li>Nodemon</li>
     <li>Axios</li>
 </ul>
+
+### Для запуска - `node 16.x`
